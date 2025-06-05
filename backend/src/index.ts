@@ -9,6 +9,10 @@ import { errorHandler } from "./middlewares/errorHandler.middleware";
 import { HTTPSTATUS } from "./config/http.config";
 import { asyncHandler } from "./middlewares/asyncHandler.middleware";
 
+import "./config/passport.config"; // Ensure passport is configured before routes are defined
+import passport from "passport";
+import authRoute from "./routes/auth.route";
+
 const app = express();
 
 const BASE_PATH = config.BASE_PATH
@@ -28,9 +32,12 @@ app.use(
     })
 );
 
+app.use(passport.initialize());
+app.use(passport.session());
+
 app.use(
     cors({
-        origin: config.FRONTEND_URL,
+        origin: config.FRONTEND_ORIGIN,
         credentials: true,
     })
 );
@@ -40,6 +47,8 @@ app.get('/', asyncHandler(async (req: Request, res: Response, next: NextFunction
         message: "Welcome to the Project Management API"
     });
 }));
+
+app.use(`{BASE_PATH}/auth`, authRoute)
 
 app.use(errorHandler);
 
